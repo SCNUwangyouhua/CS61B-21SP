@@ -1,8 +1,11 @@
 package game2048;
 
 import java.util.Formatter;
+import java.util.LinkedList;
 import java.util.Observable;
 
+import java.util.LinkedList;
+import java.util.Queue;
 
 /** The state of a game of 2048.
  *  @author TODO: YOUR NAME HERE
@@ -114,6 +117,70 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+        //changed direction
+        board.setViewingPerspective(side);
+
+
+
+        for(int nowCol = 0; nowCol < this.board.size(); nowCol += 1) {
+            Queue<Integer> NoNullTileRowIndex = new LinkedList();
+
+            for (int nowRow = this.board.size() - 1; nowRow >= 0; nowRow -= 1) {
+                Tile temptile = this.board.tile(nowCol, nowRow);
+                if (temptile == null) {
+                    continue;
+                }
+                NoNullTileRowIndex.add(nowRow);
+            }
+            //this column is empty
+            if (NoNullTileRowIndex.isEmpty()) {
+                continue;
+            }
+            boolean hasPlaced[] = new boolean[this.board.size()];
+            boolean isMerged[] = new boolean[this.board.size()];
+            while (!NoNullTileRowIndex.isEmpty()) {
+                int nowTileRow = NoNullTileRowIndex.poll();
+                for (int toPutRow = this.board.size() - 1; toPutRow >= 0; toPutRow -= 1) {
+                    Tile temptile = this.board.tile(nowCol, toPutRow);
+                    if (hasPlaced[toPutRow] == true) {
+                        continue;
+                    }
+
+                    boolean nochanged = false;
+                    if (nowTileRow == toPutRow) {
+                        nochanged = true;
+                    }
+                    if (nowTileRow >= toPutRow) {
+                        toPutRow = nowTileRow;
+                    }
+
+
+                    Tile toMoveTile = this.board.tile(nowCol, nowTileRow);
+                    //先判断能否与上方的tile合并
+                    if (toPutRow+1 < this.board.size()
+                            && isMerged[toPutRow+1] == false && isMerged[toPutRow] == false
+                            && toMoveTile.value() == this.board.tile(nowCol, toPutRow+1).value()) {
+                        board.move(nowCol, toPutRow+1, toMoveTile);
+                        changed = true;
+                        isMerged[toPutRow+1] = true;
+                        this.score += board.tile(nowCol, toPutRow+1).value();
+                        break;
+                    }
+                    //至此 不能与上方tile合并 于是 把toMoveTile 移动到当前为null的tile即可
+                    this.board.move(nowCol, toPutRow, toMoveTile);
+                    hasPlaced[toPutRow] = true;
+                    if (!nochanged) {
+                        changed = true;
+                    }
+                    break;
+                }
+            }
+
+        }
+
+        //back direction
+        board.setViewingPerspective(Side.NORTH);
+
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,7 +205,16 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        boolean haveEmptySpace = false;
+        for (int trow = 0; trow < b.size(); trow += 1) {
+            for (int tcol = 0; tcol < b.size(); tcol += 1) {
+                Tile ttile = b.tile(tcol, trow);
+                if (ttile == null) {
+                    haveEmptySpace = true;
+                }
+            }
+        }
+        return haveEmptySpace;
     }
 
     /**
@@ -148,7 +224,20 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        boolean haveMaxTile = false;
+        for (int trow = 0; trow < b.size(); trow += 1) {
+            for (int tcol = 0; tcol < b.size(); tcol += 1) {
+                Tile ttile = b.tile(tcol, trow);
+                if (ttile == null) {
+                    continue;
+                }
+                if (ttile.value() == MAX_PIECE) {
+                    haveMaxTile = true;
+                }
+            }
+        }
+
+        return haveMaxTile;
     }
 
     /**
@@ -159,6 +248,24 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true;
+        }
+        for (int trow = 0; trow < b.size(); trow += 1) {
+            for (int tcol = 0; tcol < b.size(); tcol += 1) {
+                Tile ttile = b.tile(tcol, trow);
+                int tvalue = ttile.value();
+                if (trow - 1 > 0 && tvalue == b.tile(tcol, trow - 1).value()) {
+                    return true;
+                } else if (trow + 1 < b.size() && tvalue == b.tile(tcol, trow + 1).value()) {
+                    return true;
+                } else if (tcol - 1 > 0 && tvalue == b.tile(tcol - 1, trow).value()) {
+                    return true;
+                } else if (tcol + 1 < b.size() && tvalue == b.tile(tcol + 1, trow).value()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

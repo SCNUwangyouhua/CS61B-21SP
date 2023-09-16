@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 public class TestUpOnly extends TestUtils {
 
 
+
     @Test
     /** Move tiles up (no merging). */
     public void testUpNoMerge() {
