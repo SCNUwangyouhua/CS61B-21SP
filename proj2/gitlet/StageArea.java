@@ -53,7 +53,7 @@ public class StageArea implements Serializable {
 
 
     //将文件add进addstage
-    public void add(File FileInCWD) throws IOException {
+    public void add(File FileInCWD) {
 
         //当前传进来的文件的路径(String形式)，用于作为map的key值
         String PathOfFileInCWD = FileInCWD.getPath();
@@ -104,7 +104,7 @@ public class StageArea implements Serializable {
     }
 
     //将文件加入removestage
-    public void remove(String file_name_to_rm) throws IOException {
+    public void remove(String file_name_to_rm) {
         File file_to_rm = Utils.join(Repository.CWD, file_name_to_rm);
         String path = file_to_rm.getPath();
         toremove_pathToBlobID.add(path);
@@ -115,7 +115,7 @@ public class StageArea implements Serializable {
         save();
     }
     //将文件加入removestage
-    public void remove(File file_to_rm) throws IOException {
+    public void remove(File file_to_rm) {
         String path = file_to_rm.getPath();
         toremove_pathToBlobID.add(path);
         if (file_to_rm.exists()) {
@@ -136,12 +136,7 @@ public class StageArea implements Serializable {
 
 
     //更新暂存区，将暂存区存入.gitlet/StageArea(text)
-    public void save() throws IOException {
-        //如果暂存区文件没创建就创建以下
-        if (!Repository.StageAreaFile.exists()) {
-            Repository.StageAreaFile.createNewFile();
-        }
-
+    public void save() {
         //向暂存区文件写入当前Object
         Utils.writeObject(Repository.StageAreaFile, this);
     }
@@ -187,7 +182,7 @@ public class StageArea implements Serializable {
     }
 
     //删除addstage当中的文件，慎用！！！！！！！！！！！！！！！！
-    public void remove_file_in_addstage(String to_remove_file_name) throws IOException {
+    public void remove_file_in_addstage(String to_remove_file_name) {
         File file_to_remove = Utils.join(Repository.CWD, to_remove_file_name);
         String path = file_to_remove.getPath();
         toadd_pathToBlobID.remove(path);
@@ -195,7 +190,7 @@ public class StageArea implements Serializable {
         save();
     }
     //删除removestage当中的文件，慎用！！！！！！！！！！！！！！！
-    public void remove_file_in_removestage(String to_remove_file_name) throws IOException {
+    public void remove_file_in_removestage(String to_remove_file_name) {
         File file_to_remove = Utils.join(Repository.CWD, to_remove_file_name);
         String path = file_to_remove.getPath();
         toremove_pathToBlobID.remove(path);

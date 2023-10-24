@@ -49,7 +49,7 @@ public class Repository {
     //------------------------------------------------------------------------------
 
     //仓库接受merge指令
-    public static void merge(String other_branch) throws IOException {
+    public static void merge(String other_branch) {
         //检查四种错误情况，并返回other branch上最新commit对象
         Commit other_commit = check_error_for_merge(other_branch);
         //找公共祖先
@@ -160,7 +160,7 @@ public class Repository {
 
     //传入 (File冲突文件，cur当前分支这个文件对应ID，other被合并分支这个文件对应ID)
     //获得冲突文件应该的内容，并将冲突写入CWD中然后保存至暂存区，等merge完commit时保存在记录中
-    private static void solve_conflict_file(File conflict_file, String cur_blobid, String other_blobid) throws IOException {
+    private static void solve_conflict_file(File conflict_file, String cur_blobid, String other_blobid) {
         String Conflict_Content = get_conflict_content(cur_blobid, other_blobid);
         Utils.writeContents(conflict_file, Conflict_Content);
         a_stage_area.add(conflict_file);
@@ -186,7 +186,7 @@ public class Repository {
 
 
     //在文件合并前判断特殊情况
-    public static void check_special_in_merge(Commit LCA, Commit other_last_commit, String target_branch_name) throws IOException {
+    public static void check_special_in_merge(Commit LCA, Commit other_last_commit, String target_branch_name) {
         //如果LCA和Master最新Commit相同，只需要将当前commit更新到other_last_commit，实际就是切换分支到被merge进来的分支
         if (LCA.getCommitObjectID().equals(last_commit_obj.getCommitObjectID())) {
             //更新最新分支，修改CWD下文件
@@ -286,7 +286,7 @@ public class Repository {
     }
 
     //仓库接受 reset 指令
-    public static void reset(String back_to_this_commit_ID) throws IOException {
+    public static void reset(String back_to_this_commit_ID) {
         File commit_file = Utils.join(COMMITS_FOLDER, back_to_this_commit_ID);
         if (!commit_file.exists()) {
             System.out.println("No commit with that id exists.");
@@ -353,7 +353,7 @@ public class Repository {
     }
 
     //仓库接受新建branch指令
-    public static void create_new_branch(String new_branch_name) throws IOException {
+    public static void create_new_branch(String new_branch_name) {
 
         //传入一个新的分支的名字，在heads文件夹内创建新文件并写入当前commit ID
         File new_branch_file = Utils.join(ALL_HEADS_FOLD, new_branch_name);
@@ -369,7 +369,7 @@ public class Repository {
     }
 
     //仓库接受checkout branch_name 指令
-    public static void checkout_branchname(String given_branch_name) throws IOException {
+    public static void checkout_branchname(String given_branch_name) {
         //判断这个branch是否与当前branch相等
         if (get_current_branch().equals(given_branch_name)) {
             System.out.println("No need to checkout the current branch.");
@@ -401,7 +401,7 @@ public class Repository {
         writeContents(HEAD_FOLD, given_branch_name);
     }
     //任务A函数(把当前分支最新commit对象更改)
-    public static void checkout_commit(Commit new_commit_obj) throws IOException {
+    public static void checkout_commit(Commit new_commit_obj) {
         //首先把暂存区清空了
         a_stage_area.clear();
         a_stage_area.save();
@@ -590,7 +590,7 @@ public class Repository {
     //log指令的helper函数----------------------------------------
 
     //仓库接受rm指令
-    public static void remove_file(String to_rm_file_name) throws IOException {
+    public static void remove_file(String to_rm_file_name) {
         //情况1：传入的文件在addstage当中
         if (!a_stage_area.is_addstage_Empty() && a_stage_area.check_file_is_in_addstage(to_rm_file_name)) {
             a_stage_area.remove_file_in_addstage(to_rm_file_name);
@@ -608,7 +608,7 @@ public class Repository {
     }
 
     //仓库接收一个add指令，并将其转交暂存区处理
-    public static void add(String filename) throws IOException {
+    public static void add(String filename) {
         File tempfile = join(CWD, filename);
         if (!tempfile.exists()) {
             System.out.println("File does not exit.");
@@ -688,7 +688,7 @@ public class Repository {
     }
 
     //初始化函数init()的主体部分 ----------init----------init----------init----------
-    public static void init() throws IOException {
+    public static void init() {
         //检查是否是重复init。是的话则报错
         initTwiceCheck();
         //设置文件结构
@@ -730,14 +730,14 @@ public class Repository {
      *          --HEAD(file)
      *          --StageArea(file)
      */
-    private static void setupPersistence() throws IOException {
+    private static void setupPersistence() {
         //创建文件
         //.gitlet
         GITLET_FOLDER.mkdir();
         //.gitlet/objects
         OBJECTS_FOLDER.mkdir();
         //.gitlet/HEAD.txt
-        HEAD_FOLD.createNewFile();
+//        HEAD_FOLD.createNewFile();
         //.gitlet/Blobs
         BLOBS_FOLDER.mkdir();
         //.gitlet/Commits
@@ -749,7 +749,7 @@ public class Repository {
     }
 
     //新建默认commit
-    private static void createFirstCommit() throws IOException {
+    private static void createFirstCommit()  {
         //创建无参数Commit对象，并保存
         Commit firstCommitObject = new Commit();
         firstCommitObject.save();
@@ -767,7 +767,7 @@ public class Repository {
 
     //根据传入的branch分支文件路径，更新该文件中内容，将该branch指针指向最新的Commit对象的ID
     //新创建仓库 或者 在当前branch新提交一个commit时要用到
-    private static void setBranchHead(File branch_info_file, String new_commit_object_ID) throws IOException {
+    private static void setBranchHead(File branch_info_file, String new_commit_object_ID) {
         writeContents(branch_info_file, new_commit_object_ID);
     }
 
