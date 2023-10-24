@@ -1,17 +1,17 @@
 # This makefile is defined to give you the following targets:
 #
-#    default: The default target: Compiles $(PROG) and whatever it 
+#    default: The default target: Compiles $(PROG) and whatever it
 #	   depends on.
 #    check: Compile $(PROG), if needed, and then for each file, F.in, in
 #	   directory testing, use F.in as input to "java $(MAIN_CLASS)" and
 #          compare the output to the contents of the file names F.out.
 #          Report discrepencies.
-#    clean: Remove all the .class files produced by java compilation, 
+#    clean: Remove all the .class files produced by java compilation,
 #          all Emacs backup files, and testing output files.
 #
-# In other words, type 'make' to compile everything; 'make check' to 
+# In other words, type 'make' to compile everything; 'make check' to
 # compile and test everything, and 'make clean' to clean things up.
-# 
+#
 # You can use this file without understanding most of it, of course, but
 # I strongly recommend that you try to figure it out, and where you cannot,
 # that you ask questions.
