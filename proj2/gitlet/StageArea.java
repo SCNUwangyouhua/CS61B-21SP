@@ -33,6 +33,7 @@ public class StageArea implements Serializable {
             System.out.println("No changes added to the commit.");
             exit(0);
         }
+        tracking_pathToBlobID = Repository.last_commit_obj.getTracking();
         tracking_pathToBlobID.putAll(toadd_pathToBlobID);
         for (String filepath : toremove_pathToBlobID) {
             tracking_pathToBlobID.remove(filepath);

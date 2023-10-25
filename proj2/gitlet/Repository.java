@@ -41,12 +41,30 @@ public class Repository {
     public static StageArea a_stage_area = StageArea.fromfile();
     //当前的branch
     private static String now_branch = get_current_branch();
-    //当前分支最新的commit
     public static Commit last_commit_obj = get_last_commit();
 
-    //------------------------------------------------------------------------------
+    //-------------------------------------------------------
+    //    //当前分支最新的commit-----------------------
     //下面为function 函数/功能 部分
     //------------------------------------------------------------------------------
+
+    public static void showtrack() {
+//        System.out.println("cur branch is " + now_branch);
+//        System.out.println("cur track is " + last_commit_obj.getTracking());
+        List<String>namelist = Utils.plainFilenamesIn(ALL_HEADS_FOLD);
+        for (String filename : namelist) {
+            if (filename.equals(now_branch)) {
+                continue;
+            }
+//            System.out.println("now is branch " + filename);
+//            System.out.print("new commit id = ");
+            String comid = Utils.readContentsAsString(Utils.join(ALL_HEADS_FOLD, filename));
+//            System.out.println(comid);
+            Commit temp = Commit.fromFile(comid);
+//            System.out.println("new commit track is " + temp.getTracking());
+        }
+    }
+
 
     //仓库接受merge指令
     public static void merge(String other_branch) {
@@ -54,11 +72,18 @@ public class Repository {
         Commit other_commit = check_error_for_merge(other_branch);
         //找公共祖先
         Commit lca = Find_LCA_with_two_commits(last_commit_obj, other_commit);
+//        System.out.println("LCA commit id = " + lca.getCommitObjectID());
+//        System.out.println("LCA tracking is = " + lca.getTracking());
         //判断2个特殊情况
         check_special_in_merge(lca, other_commit, other_branch);
         Map<String, String> cur_track = last_commit_obj.getTracking();
         Map<String, String> other_track = other_commit.getTracking();
         Map<String, String> lca_track =  lca.getTracking();
+
+//        System.out.println("lca track is " + lca_track);
+//        System.out.println("other track is " + other_track);
+//        System.out.println("cur track is " + cur_track);
+
         boolean isConflict = false;
         Set<String> filepath_in_lca = new HashSet<>();
         for (String lca_filepath : lca_track.keySet()) {
@@ -73,10 +98,16 @@ public class Repository {
             String other_file_blobid = other_track.get(lca_filepath);
             String cur_file_blobid = cur_track.get(lca_filepath);
 
+//            System.out.println("now is filepath = " + lca_filepath);
+//            System.out.println("lca file blobid = " + lca_file_blobid);
+//            System.out.println("other file blobid = " + other_file_blobid);
+//            System.out.println("cur file blobid = " + cur_file_blobid);
+
             if (other_file_blobid != null) {
                 //该文件存在于other分支
                 if (lca_file_blobid.equals(other_file_blobid)) {
                     //该文件在other处没被更改：啥也不干
+//                    System.out.println("case 1");
                     continue;
                 }
                 //该文件在other处被更改了
@@ -84,6 +115,7 @@ public class Repository {
                     //该文件在other处被更改了+该文件在cur处不存在
                     isConflict = true;
                     solve_conflict_file(lca_file, cur_file_blobid, other_file_blobid);
+//                    System.out.println("case 2");
                     continue;
                 }
                 //该文件在other处被更改了+该文件存在于cur
@@ -91,29 +123,35 @@ public class Repository {
                     //该文件在other处被更改了+该文件在cur处没被更改
                     Blob.fromFile(other_file_blobid).save_back_in_CWD();
                     a_stage_area.add(lca_file);
+//                    System.out.println("case 3");
                     continue;
                 }
                 //该文件在other处被更改了+该文件在cur处被更改了
                 if (other_file_blobid.equals(cur_file_blobid)) {
                     //该文件在other处被更改了+该文件在cur处被更改了+BlobID相等：啥也不干
+//                    System.out.println("case 4");
                     continue;
                 }
                 //该文件在other处被更改了+该文件在cur处被更改了+BlobID不相等
                 isConflict = true;
                 solve_conflict_file(lca_file, cur_file_blobid, other_file_blobid);
+//                System.out.println("case 5");
                 continue;
             }
             //该文件在other处不存在
             if (cur_file_blobid == null) {
                 //该文件在other处不存在+该文件在cur处不存在：啥也不干
+//                System.out.println("case 6");
                 continue;
             }
             //该文件在other处不存在+该文件存在于cur处
             if (lca_file_blobid.equals(cur_file_blobid)) {
                 //该文件在other处不存在+该文件在cur处没被改
                 a_stage_area.remove(lca_file);
+//                System.out.println("case 7");
                 continue;
             }
+//            System.out.println("case 8");
             //该文件在other处不存在+该文件在cur处被修改了
             isConflict = true;
             solve_conflict_file(lca_file, cur_file_blobid, other_file_blobid);
@@ -130,21 +168,27 @@ public class Repository {
             String cur_file_blobid = cur_track.get(other_filepath);
             //因为从other_track遍历，所以
             //文件被新增于other中
+
+//            System.out.println("new filepath in other is " + other_filepath);
+
             if (cur_file_blobid == null) {
                 //文件被新增于other中+文件没有新增于cur中
                 //TODO: add file
                 Blob.fromFile(other_file_blobid).save_back_in_CWD();
                 a_stage_area.add(other_file);
+//                System.out.println("case A");
                 continue;
             }
             //文件被新增于other中+文件被新增于cur中
             if (cur_file_blobid.equals(other_file_blobid)) {
                 //文件被新增于other中+文件没有新增于cur中+两文件相等(Blobid即内容)
+//                System.out.println("case B");
                 continue;
             }
             //文件被新增于other中+文件被新增于cur中+两文件不相等
             isConflict = true;
             solve_conflict_file(other_file, cur_file_blobid, other_file_blobid);
+//            System.out.println("case C");
         }
         //调用commit 提交有2个参数 所以调用merge版commit
         //第一个参数是message 必须是 "Merged other_branch_name into current_branch_name"
@@ -216,6 +260,9 @@ public class Repository {
         go_to_init(commit_first.getCommitObjectID(), 0, Map_first);
         go_to_init(commit_second.getCommitObjectID(), 0, Map_second);
 
+//        System.out.println("commit first map: " + Map_first);
+//        System.out.println("commit second map: " + Map_second);
+
         //创建minkey mindepth记录
         String minkey = null;
         int mindepth = -1;
@@ -224,17 +271,23 @@ public class Repository {
             if (!Map_second.containsKey(key_first)) {
                 continue;
             }
+
+//            System.out.println("key first = " + key_first);
+//            System.out.println("depth = " + Map_first.get(key_first));
+
             //key_first在Map_second中也存在
             if (mindepth == -1) {
                 //找到的第一个符合条件的key val
                 mindepth = Map_first.get(key_first);
                 minkey = key_first;
+//                System.out.println("minkey = " + minkey);
                 continue;
             }
             if (Map_first.get(key_first) < mindepth) {
                 //不是第一个 与先前比较，存储最小的深度
                 mindepth = Map_first.get(key_first);
                 minkey = key_first;
+//                System.out.println("minkey = " + minkey);
             }
         }
         //通过找到的minkey返回最近公共祖先(Commit对象)
@@ -242,9 +295,12 @@ public class Repository {
     }
     //接受一个commit节点，递归所有路径并回到根节点，返回过程中记录的<commit ID, depth>Map
     public static void go_to_init(String arrive_commit_id, int depth, Map<String, Integer> store_map) {
+        System.out.println("now at commit id = " + arrive_commit_id);
+        System.out.println("now depth is " + depth);
         Commit arrive_commit_obj = Commit.fromFile(arrive_commit_id);
         //判断是否到达init
         if (arrive_commit_obj.getParents().isEmpty()) {
+//            System.out.println("arrive at init commit");
             //达到init 记如入init后递归停止
             store_map.put(arrive_commit_id, depth);
             return;
@@ -252,8 +308,10 @@ public class Repository {
         List<String> arrive_commit_par = arrive_commit_obj.getParents();
         String par1_id = arrive_commit_par.get(0);
         if (depth != 0) {
-            store_map.put(par1_id, depth);
+//            System.out.println("put id and depth is " + arrive_commit_obj + " " + depth);
+            store_map.put(arrive_commit_id, depth);
         }
+//        System.out.println("goto par id = " + par1_id);
         go_to_init(par1_id, depth+1, store_map);
         //如果有第二个parent就遍历
         if (arrive_commit_par.size() > 1) {

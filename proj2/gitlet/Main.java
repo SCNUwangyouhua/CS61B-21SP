@@ -95,7 +95,9 @@ public class Main {
                 validateNumArgs("merge", args, 2);
                 Repository.merge(args[1]);
                 break;
-
+//            case "track":
+//                Repository.showtrack();
+//                break;
             default:
                 System.out.println("No command with that name exists");
                 exit(0);
