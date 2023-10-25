@@ -48,22 +48,22 @@ public class Repository {
     //下面为function 函数/功能 部分
     //------------------------------------------------------------------------------
 
-    public static void showtrack() {
+//    public static void showtrack() {
 //        System.out.println("cur branch is " + now_branch);
 //        System.out.println("cur track is " + last_commit_obj.getTracking());
-        List<String>namelist = Utils.plainFilenamesIn(ALL_HEADS_FOLD);
-        for (String filename : namelist) {
-            if (filename.equals(now_branch)) {
-                continue;
-            }
+//        List<String>namelist = Utils.plainFilenamesIn(ALL_HEADS_FOLD);
+//        for (String filename : namelist) {
+//            if (filename.equals(now_branch)) {
+//                continue;
+//            }
 //            System.out.println("now is branch " + filename);
 //            System.out.print("new commit id = ");
-            String comid = Utils.readContentsAsString(Utils.join(ALL_HEADS_FOLD, filename));
+//            String comid = Utils.readContentsAsString(Utils.join(ALL_HEADS_FOLD, filename));
 //            System.out.println(comid);
-            Commit temp = Commit.fromFile(comid);
+//            Commit temp = Commit.fromFile(comid);
 //            System.out.println("new commit track is " + temp.getTracking());
-        }
-    }
+//        }
+//    }
 
 
     //仓库接受merge指令
@@ -310,7 +310,7 @@ public class Repository {
         List<String> arrive_commit_par = arrive_commit_obj.getParents();
         String par1_id = arrive_commit_par.get(0);
         if (depth != 0) {
-//            System.out.println("put id and depth is " + arrive_commit_obj + " " + depth);
+//            System.out.println("put id and depth is " + arrive_commit_obj.getCommitObjectID() + " " + depth);
             store_map.put(arrive_commit_id, depth);
         }
 //        System.out.println("goto par id = " + par1_id);
@@ -318,10 +318,10 @@ public class Repository {
         //如果有第二个parent就遍历
         if (arrive_commit_par.size() > 1) {
             String par2_id = arrive_commit_par.get(1);
-            if (depth != 0) {
-                store_map.put(par2_id, depth);
-                go_to_init(par2_id, depth+1, store_map);
-            }
+//            System.out.println("commit id = " + arrive_commit_id + " has second parent");
+//            System.out.println("its parent2 id is " + par2_id);
+//            System.out.println("so go to its second parent if depth = " + depth + " is not 0");
+            go_to_init(par2_id, depth+1, store_map);//depth=0也要遍历其两个父节点，bug here终于发现了
         }
     }
     //检查merge之前所有的error情况
