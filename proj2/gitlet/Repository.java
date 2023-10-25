@@ -70,9 +70,11 @@ public class Repository {
     public static void merge(String other_branch) {
         //检查四种错误情况，并返回other branch上最新commit对象
         Commit other_commit = check_error_for_merge(other_branch);
+        System.out.println("other commit id is " + other_commit.getCommitObjectID());
+        System.out.println("other commit tracking is " + other_commit.getTracking());
         //找公共祖先
         Commit lca = Find_LCA_with_two_commits(last_commit_obj, other_commit);
-//        System.out.println("LCA commit id = " + lca.getCommitObjectID());
+        System.out.println("LCA commit id = " + lca.getCommitObjectID());
 //        System.out.println("LCA tracking is = " + lca.getTracking());
         //判断2个特殊情况
         check_special_in_merge(lca, other_commit, other_branch);
@@ -309,10 +311,10 @@ public class Repository {
         }
         List<String> arrive_commit_par = arrive_commit_obj.getParents();
         String par1_id = arrive_commit_par.get(0);
-        if (depth != 0) {
-//            System.out.println("put id and depth is " + arrive_commit_obj.getCommitObjectID() + " " + depth);
-            store_map.put(arrive_commit_id, depth);
-        }
+
+//        System.out.println("put id and depth is " + arrive_commit_obj.getCommitObjectID() + " " + depth);
+        store_map.put(arrive_commit_id, depth);
+
 //        System.out.println("goto par id = " + par1_id);
         go_to_init(par1_id, depth+1, store_map);
         //如果有第二个parent就遍历
