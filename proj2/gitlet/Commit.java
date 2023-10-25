@@ -11,6 +11,7 @@ import java.util.*;
 
 import static gitlet.Utils.readObject;
 import static gitlet.Utils.sha1;
+import static java.lang.System.exit;
 
 /** Gitlet中的Commit对象 */
 public class Commit implements Serializable {
@@ -152,5 +153,27 @@ public class Commit implements Serializable {
         }
     }
 
-
+    //根据前若干位commitID返回完整ID
+    public static String get_total_commitID(String part_commit_id) {
+        if (part_commit_id.length() < 4) {
+            System.out.println("Commit id should contain at least 4 characters.");
+            exit(0);
+        }
+        List<String> filenamelist = Utils.plainFilenamesIn(Repository.COMMITS_FOLDER);
+        List<String> match_commitid = new ArrayList<>();
+        for (String tempfile_commitid : filenamelist) {
+            if (tempfile_commitid.substring(0, part_commit_id.length()).equals(part_commit_id)) {
+                match_commitid.add(tempfile_commitid);
+            }
+        }
+        if (match_commitid.isEmpty()) {
+            System.out.println("No commit with that id exists.");
+            exit(0);
+        }
+        if (match_commitid.size() > 1) {
+            System.out.println("More than 1 commit has the same id prefix.");
+            exit(0);
+        }
+        return match_commitid.get(0);
+    }
 }

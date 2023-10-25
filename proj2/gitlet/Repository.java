@@ -70,11 +70,11 @@ public class Repository {
     public static void merge(String other_branch) {
         //检查四种错误情况，并返回other branch上最新commit对象
         Commit other_commit = check_error_for_merge(other_branch);
-        System.out.println("other commit id is " + other_commit.getCommitObjectID());
-        System.out.println("other commit tracking is " + other_commit.getTracking());
+//        System.out.println("other commit id is " + other_commit.getCommitObjectID());
+//        System.out.println("other commit tracking is " + other_commit.getTracking());
         //找公共祖先
         Commit lca = Find_LCA_with_two_commits(last_commit_obj, other_commit);
-        System.out.println("LCA commit id = " + lca.getCommitObjectID());
+//        System.out.println("LCA commit id = " + lca.getCommitObjectID());
 //        System.out.println("LCA tracking is = " + lca.getTracking());
         //判断2个特殊情况
         check_special_in_merge(lca, other_commit, other_branch);
@@ -175,7 +175,6 @@ public class Repository {
 
             if (cur_file_blobid == null) {
                 //文件被新增于other中+文件没有新增于cur中
-                //TODO: add file
                 Blob.fromFile(other_file_blobid).save_back_in_CWD();
                 a_stage_area.add(other_file);
 //                System.out.println("case A");
@@ -477,8 +476,12 @@ public class Repository {
         new_commit_obj.change_cwd_by_stored_cwd_in_commitOBJ();
     }
 
+
     //仓库接受checkout commit_id -- filename指令
     public static void checkout_filename_with_commit_id(String commit_ID, String to_checkout_filename) {
+        if (commit_ID.length() < UID_LENGTH) {
+            commit_ID = Commit.get_total_commitID(commit_ID);
+        }
         String given_file_Blob_ID = Repository.check_commit_exist_and_has_filename(to_checkout_filename, commit_ID);
         //获得Blob ID之后，我们要覆盖当前CWD的文件
         Blob given_file_in_Blob_fold = Blob.fromFile(given_file_Blob_ID);
