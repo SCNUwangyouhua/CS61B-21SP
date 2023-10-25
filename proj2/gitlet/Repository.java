@@ -226,6 +226,7 @@ public class Repository {
             target_content.append(System.getProperty("line.separator"));
         }
         target_content.append(">>>>>>>");
+        target_content.append(System.getProperty("line.separator"));
         return target_content.toString();
     }
 
