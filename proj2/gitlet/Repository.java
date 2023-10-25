@@ -295,8 +295,8 @@ public class Repository {
     }
     //接受一个commit节点，递归所有路径并回到根节点，返回过程中记录的<commit ID, depth>Map
     public static void go_to_init(String arrive_commit_id, int depth, Map<String, Integer> store_map) {
-        System.out.println("now at commit id = " + arrive_commit_id);
-        System.out.println("now depth is " + depth);
+//        System.out.println("now at commit id = " + arrive_commit_id);
+//        System.out.println("now depth is " + depth);
         Commit arrive_commit_obj = Commit.fromFile(arrive_commit_id);
         //判断是否到达init
         if (arrive_commit_obj.getParents().isEmpty()) {
