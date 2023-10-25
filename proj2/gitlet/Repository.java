@@ -212,17 +212,18 @@ public class Repository {
     //传入cur_blobid, other_blobid 因为冲突，根据blobid生成冲突格式的文件内容
     private static String get_conflict_content(String cur_blobid, String other_blobid) {
         StringBuilder target_content = new StringBuilder();
-        target_content.append("<<<<<<< HEAD");
-        target_content.append("\n");
+        target_content.append("<<<<<<< HEAD").append(System.getProperty("line.separator"));
         if (cur_blobid != null) {
             Blob cur_blobobj = Blob.fromFile(cur_blobid);
             target_content.append(cur_blobobj.getContent());
+            target_content.append(System.getProperty("line.separator"));
         }
         target_content.append("=======");
-        target_content.append("\n");
+        target_content.append(System.getProperty("line.separator"));
         if (other_blobid != null) {
             Blob other_blobobj = Blob.fromFile(other_blobid);
             target_content.append(other_blobobj.getContent());
+            target_content.append(System.getProperty("line.separator"));
         }
         target_content.append(">>>>>>>");
         return target_content.toString();
