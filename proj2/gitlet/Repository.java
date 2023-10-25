@@ -3,6 +3,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -542,22 +543,93 @@ public class Repository {
     public static void status() {
         show_branches_status();
         show_stage_status();
-        /**
-         *
-         * 暂时跳过实现这个
-         * === Modifications Not Staged For Commit ===
-         * junk.txt (deleted)
-         * wug3.txt (modified)
-         *
-         * === Untracked Files ===
-         * random.stuff
-         *
-         * */
-        //因为跳过了，所以打印个空的展示
-        System.out.println("=== Modifications Not Staged For Commit ===");
-        System.out.println();
-        System.out.println("=== Untracked Files ===");
-        System.out.println();
+        //剩下这个函数打印
+        //=== Modifications Not Staged For Commit ===
+        //=== Untracked Files ===
+        show_last_two();
+    }
+    public static void show_last_two() {
+        List<String> Modifications_notstage_pathlist = new ArrayList<>();
+        Set<String> Delete_notstage_pathlist = new HashSet<>();
+
+        //先计算当前CWD目录下的 <path, blobid> 的Map
+
+        //求当前CWD下文件(除去Makefile和pom.xml分别是用于项目测试和项目上传的文件)
+        List<String> ignoredFiles = Arrays.asList("Makefile", "pom.xml");
+        File[] current_cwd = Arrays.stream(CWD.listFiles())
+                .filter(File::isFile)
+                .filter(f -> !ignoredFiles.contains(f.getName()))
+                .toArray(File[]::new);
+        Map<String, String> current_filemap = new HashMap<>();
+        for (File file : current_cwd) {
+            String tempfilepath = file.getPath();
+            String tempblobid = Blob.calculateID(file);
+            current_filemap.put(tempfilepath, tempblobid);
+        }
+
+        //再计算当前最新commit+暂存区所track的结果，用于后续比较
+        Map<String, String> commit_trackmap = last_commit_obj.getTracking();
+        commit_trackmap.putAll(a_stage_area.get_addstage());
+        for (String toremove_filepath : a_stage_area.get_removestage()) {
+            commit_trackmap.remove(toremove_filepath);
+        }
+
+//        System.out.println("current filemap = " + current_filemap);
+//        System.out.println("commit trackmap = " + commit_trackmap);
+
+        for (String track_filepath : commit_trackmap.keySet()) {
+            String track_blobid = commit_trackmap.get(track_filepath);
+            String CWDfile_blobid = current_filemap.get(track_filepath);
+//            System.out.println("now filepath is " + track_filepath);
+//            System.out.println("track blobid is " + track_blobid);
+//            System.out.println("CWDfile blobid is " + CWDfile_blobid);
+            if (CWDfile_blobid == null) {
+                //track了，但是在CWD中被删
+                Modifications_notstage_pathlist.add(track_filepath);
+                Delete_notstage_pathlist.add(track_filepath);
+                continue;
+            }
+            //存在于CWD中，且CWD中与 commit所track的内容/暂存区add的内容 不一样了
+            if (!track_blobid.equals(CWDfile_blobid)) {
+                Modifications_notstage_pathlist.add(track_filepath);
+            }
+            //存在于当前CWD中且记录过，所以删去
+            current_filemap.remove(track_filepath);
+        }
+        //因为打印要按照字母顺序，所以排序一下
+        Modifications_notstage_pathlist.sort(String::compareTo);
+//        System.out.println("Modifi..list = " + Modifications_notstage_pathlist);
+//        System.out.println("Dele....list = " + Delete_notstage_pathlist);
+        StringBuilder statusBuilder_Modification_part = new StringBuilder();
+        //遍历Modification这个Map，根据是否存在于Delete的Set中来append打印消息
+        statusBuilder_Modification_part.append("=== Modifications Not Staged For Commit ===");
+        statusBuilder_Modification_part.append("\n");
+        for (String target_filepath : Modifications_notstage_pathlist) {
+            File _file = new File(target_filepath);
+            String target_filename = _file.getName();
+            statusBuilder_Modification_part.append(target_filename);
+            if (Delete_notstage_pathlist.contains(target_filepath)) {
+                statusBuilder_Modification_part.append(" (deleted)");
+            } else {
+                statusBuilder_Modification_part.append(" (modified)");
+            }
+            statusBuilder_Modification_part.append("\n");
+        }
+        System.out.println(statusBuilder_Modification_part);
+
+
+        //剩下untracked files最后一部分
+        StringBuilder statusBuilder_untrack_part = new StringBuilder();
+        statusBuilder_untrack_part.append("=== Untracked Files ===");
+        statusBuilder_untrack_part.append("\n");
+        //根据前面可可知Map -- current_filemap 已经把存在于 trackmap中的路径删去了，直接遍历其中就好
+        for (String target_filepath : current_filemap.keySet()) {
+            File _file = new File(target_filepath);
+            String target_filename = _file.getName();
+            statusBuilder_untrack_part.append(target_filename);
+            statusBuilder_untrack_part.append("\n");
+        }
+        System.out.println(statusBuilder_untrack_part);
     }
     //status指令展示branch部分
     public static void show_branches_status() {
